@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, font
 from .pages import (dashboard_page, publications_page, customers_page, 
-                    orders_page, advertisements_page, stock_page, billing_page, reports_page)
+                    orders_page, advertisements_page, stock_page, billing_page, reports_page, subscriptions_page)
 
 class EBCManagementSystem(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -47,6 +47,7 @@ class EBCManagementSystem(tk.Tk):
             "Publications": publications_page.PublicationsPage,
             "Customers": customers_page.CustomersPage,
             "Orders": orders_page.OrdersPage,
+            "Subscriptions": subscriptions_page.SubscriptionsPage,
             "Advertisements": advertisements_page.AdvertisementsPage,
             "Stock": stock_page.StockPage,
             "Billing": billing_page.BillingPage,
