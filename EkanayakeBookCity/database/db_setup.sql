@@ -84,6 +84,29 @@ CREATE TABLE IF NOT EXISTS bills (
     status ENUM('Unpaid', 'Paid') DEFAULT 'Unpaid',
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
 );
+USE ebc_db;
+
+-- 9. subscriptions Table
+CREATE TABLE subscriptions (
+    subscription_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    frequency ENUM('Daily', 'Weekly', 'Monthly') NOT NULL,
+    status ENUM('Active', 'Expired', 'Cancelled') DEFAULT 'Active',
+    last_generated_date DATE,  -- Tracks the last date for which an order was generated
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
+);
+
+-- 10. Subscriptions Item Table
+CREATE TABLE subscription_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    subscription_id INT NOT NULL,
+    publication_id INT NOT NULL,
+    quantity INT NOT NULL,
+    FOREIGN KEY (subscription_id) REFERENCES subscriptions(subscription_id) ON DELETE CASCADE,
+    FOREIGN KEY (publication_id) REFERENCES publications(publication_id)
+);
 
 -- Insert a default admin user for initial login
-INSERT INTO users (username, password_hash) VALUES ('admin', 'admin'); -- NOTE: In a real app, hash the password!
+INSERT INTO users (username, password_hash) VALUES ('admin', 'admin'); 
