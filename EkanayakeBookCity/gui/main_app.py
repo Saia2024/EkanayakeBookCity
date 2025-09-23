@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, font
 from .pages import (dashboard_page, publications_page, customers_page, 
-                    orders_page, advertisements_page, stock_page, billing_page)
+                    orders_page, advertisements_page, stock_page, billing_page, reports_page)
 
 class EBCManagementSystem(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -50,6 +50,7 @@ class EBCManagementSystem(tk.Tk):
             "Advertisements": advertisements_page.AdvertisementsPage,
             "Stock": stock_page.StockPage,
             "Billing": billing_page.BillingPage,
+            "Reports":reports_page.ReportsPage
         }
 
         # navigation buttons
