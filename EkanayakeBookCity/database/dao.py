@@ -163,6 +163,16 @@ class OrderDAO:
         query = "SELECT COUNT(*) as total FROM orders WHERE delivery_status = 'Pending'"
         result = Database.execute_query(query, fetch='one')
         return result['total'] if result else 0
+    
+    @staticmethod
+    def create_order_from_subscription(customer_id, items):
+        total_amount = sum(item['quantity'] * item['price'] for item in items)
+
+        order_date = date.today()
+        delivery_status = 'Pending'
+        payment_status = 'Unpaid'
+
+        return OrderDAO.create_order(customer_id, order_date, total_amount, items, delivery_status, payment_status)
 
 class AdvertisementDAO:
     @staticmethod
@@ -277,3 +287,73 @@ class ReportDAO:
             ORDER BY due_date;
         """
         return Database.execute_query(query, (customer_id, start_date, end_date), fetch='all')
+    
+class SubscriptionDAO:
+    @staticmethod
+    def create_subscription(customer_id, start_date, end_date, frequency, items):
+        sub_query = """
+            INSERT INTO subscriptions (customer_id, start_date, end_date, frequency)
+            VALUES (%s, %s, %s, %s)
+        """
+        sub_params = (customer_id, start_date, end_date, frequency)
+        subscription_id = Database.execute_query(sub_query, sub_params)
+
+        if not subscription_id:
+            print("Failed to create subscription record.")
+            return None
+
+        for item in items:
+            item_query = """
+                INSERT INTO subscription_items (subscription_id, publication_id, quantity)
+                VALUES (%s, %s, %s)
+            """
+            item_params = (subscription_id, item['pub_id'], item['quantity'])
+            Database.execute_query(item_query, item_params)
+        
+        return subscription_id
+
+    @staticmethod
+    def get_all_with_details():
+        query = """
+            SELECT s.subscription_id, c.name AS customer_name, s.start_date, s.end_date, s.frequency, s.status
+            FROM subscriptions s
+            JOIN customers c ON s.customer_id = c.customer_id
+            ORDER BY s.start_date DESC;
+        """
+        return Database.execute_query(query, fetch='all')
+
+    @staticmethod
+    def get_subscription_items(subscription_id):
+        query = """
+            SELECT si.publication_id, p.title, si.quantity, p.price
+            FROM subscription_items si
+            JOIN publications p ON si.publication_id = p.publication_id
+            WHERE si.subscription_id = %s;
+        """
+        return Database.execute_query(query, (subscription_id,), fetch='all')
+        
+    @staticmethod
+    def update_status(subscription_id, status):
+        query = "UPDATE subscriptions SET status = %s WHERE subscription_id = %s"
+        return Database.execute_query(query, (status, subscription_id))
+
+    @staticmethod
+    def get_due_subscriptions():
+        query = """
+            SELECT * FROM subscriptions
+            WHERE status = 'Active'
+            AND CURDATE() BETWEEN start_date AND end_date
+            AND (last_generated_date IS NULL OR last_generated_date < CURDATE())
+            AND (
+                frequency = 'Daily' OR
+                (frequency = 'Weekly' AND DAYOFWEEK(CURDATE()) = DAYOFWEEK(start_date)) OR
+                (frequency = 'Monthly' AND DAY(CURDATE()) = DAY(start_date))
+            );
+        """
+        return Database.execute_query(query, fetch='all')
+
+    @staticmethod
+    def update_last_generated_date(subscription_id):
+        query = "UPDATE subscriptions SET last_generated_date = CURDATE() WHERE subscription_id = %s"
+        return Database.execute_query(query, (subscription_id,)) 
+    
