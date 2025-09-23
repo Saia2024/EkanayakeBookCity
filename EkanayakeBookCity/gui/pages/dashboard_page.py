@@ -1,36 +1,75 @@
-# gui/pages/dashboard_page.py
 import tkinter as tk
-from tkinter import ttk
-from database.dao import PublicationDAO, CustomerDAO, OrderDAO, AdvertisementDAO
+from tkinter import ttk, messagebox
+from database.dao import PublicationDAO, CustomerDAO, OrderDAO, AdvertisementDAO, SubscriptionDAO
 
 class DashboardPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent, bg='#ecf0f1')
         self.controller = controller
 
-        # --- Title ---
+        # Title
         title_label = ttk.Label(self, text="Dashboard", font=("Arial", 24, "bold"), background='#ecf0f1')
         title_label.pack(pady=20, anchor='w', padx=10)
 
-        # --- Summary Cards Frame ---
+        
         cards_frame = tk.Frame(self, bg='#ecf0f1')
         cards_frame.pack(fill='x', pady=10, padx=10)
-        cards_frame.columnconfigure((0, 1, 2, 3), weight=1) # Make columns expandable
+        cards_frame.columnconfigure((0, 1, 2, 3), weight=1) 
 
         self.create_summary_cards(cards_frame)
 
-        # --- Recent Orders ---
+        # Recent Orders
         recent_orders_frame = ttk.LabelFrame(self, text="Recent Orders")
         recent_orders_frame.pack(fill='both', expand=True, padx=10, pady=10)
         self.create_recent_orders_table(recent_orders_frame)
 
-        # --- Quick Actions ---
-        # This section can be added for quick navigation if desired.
-        # quick_actions_frame = ttk.LabelFrame(self, text="Quick Actions")
-        # ...
+        # Quick Actions
+        quick_actions_frame = ttk.LabelFrame(self, text="Quick Actions")
+        quick_actions_frame.pack(fill='x', padx=10, pady=10)
+
+        generate_orders_btn = ttk.Button(quick_actions_frame, text="Generate Daily Subscription Orders",
+                                         command=self.generate_subscription_orders)
+        generate_orders_btn.pack(pady=10)
+        
+    def generate_subscription_orders(self):
+        self.controller.show_status_message("Checking for due subscriptions...")
+        
+        due_subscriptions = SubscriptionDAO.get_due_subscriptions()
+        
+        if not due_subscriptions:
+            messagebox.showinfo("Subscriptions", "No subscription orders are due to be generated today.")
+            self.controller.clear_status_message()
+            return
+
+        generated_count = 0
+        failed_count = 0
+
+        for sub in due_subscriptions:
+            items_to_order = SubscriptionDAO.get_subscription_items(sub['subscription_id'])
+            
+            if not items_to_order:
+                failed_count += 1
+                continue
+            order_items_list = [{'pub_id': item['publication_id'], 'quantity': item['quantity'], 'price': item['price']}
+                                for item in items_to_order]
+            
+            # Create the order
+            order_id = OrderDAO.create_order_from_subscription(sub['customer_id'], order_items_list)
+            
+            if order_id:
+                SubscriptionDAO.update_last_generated_date(sub['subscription_id'])
+                generated_count += 1
+            else:
+                failed_count += 1
+        
+        summary_message = f"Subscription Order Generation Complete.\n\n"
+        summary_message += f"Successfully Generated: {generated_count}\n"
+        summary_message += f"Failed: {failed_count}"
+        
+        messagebox.showinfo("Generation Complete", summary_message)
+        self.controller.show_status_message("Generation complete. See message box for summary.")
 
     def create_summary_cards(self, parent_frame):
-        """Creates the four summary cards for the dashboard."""
         card_data = [
             ("Total Publications", PublicationDAO.get_count(), "#8e44ad"),
             ("Active Customers", CustomerDAO.get_count(), "#2980b9"),
@@ -50,7 +89,6 @@ class DashboardPage(tk.Frame):
             title_label.pack(pady=(0, 20))
 
     def create_recent_orders_table(self, parent_frame):
-        """Creates and populates the treeview for recent orders."""
         columns = ("order_id", "customer", "date", "amount", "status")
         tree = ttk.Treeview(parent_frame, columns=columns, show='headings')
         
@@ -64,7 +102,6 @@ class DashboardPage(tk.Frame):
         tree.column("amount", width=100, anchor='e')
         tree.column("status", width=100, anchor='center')
 
-        # Load data
         recent_orders = OrderDAO.get_recent_orders(limit=15)
         if recent_orders:
             for order in recent_orders:
@@ -77,3 +114,4 @@ class DashboardPage(tk.Frame):
                 ))
         
         tree.pack(fill='both', expand=True, padx=5, pady=5)
+
