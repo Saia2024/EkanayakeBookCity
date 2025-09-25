@@ -18,25 +18,19 @@ class Database:
 
     @classmethod
     def execute_query(cls, query, params=None, fetch=None):
-        """
-        Executes a query and returns results.
-        :param query: SQL query string
-        :param params: A tuple of parameters for the query
-        :param fetch: 'one' for a single record, 'all' for multiple records
-        """
         connection = cls.get_connection()
         if connection is None:
             return None
-        cursor = connection.cursor(dictionary=True) # dictionary=True is very useful!
+        cursor = connection.cursor(dictionary=True) 
         try:
             cursor.execute(query, params)
             if fetch == 'one':
                 result = cursor.fetchone()
             elif fetch == 'all':
                 result = cursor.fetchall()
-            else: # For INSERT, UPDATE, DELETE
+            else: 
                 connection.commit()
-                result = cursor.lastrowid or cursor.rowcount # Return new ID or rows affected
+                result = cursor.lastrowid or cursor.rowcount 
             return result
         except Error as e:
             print(f"Query failed: '{e}'")
