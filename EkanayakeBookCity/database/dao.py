@@ -107,9 +107,15 @@ class StockDAO:
         return Database.execute_query(query, fetch='all')
 
     @staticmethod
-    def update(publication_id, quantity):
+    def add_quantity(publication_id, quantity_to_add):
+        query = "UPDATE stock SET quantity = quantity + %s WHERE publication_id = %s"
+        params = (quantity_to_add, publication_id)
+        return Database.execute_query(query, params)
+
+    @staticmethod
+    def update(publication_id, new_quantity):
         query = "UPDATE stock SET quantity = %s WHERE publication_id = %s"
-        params = (quantity, publication_id)
+        params = (new_quantity, publication_id)
         return Database.execute_query(query, params)
 
 class OrderDAO:
