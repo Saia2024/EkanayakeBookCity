@@ -1,5 +1,3 @@
--- database/db_setup.sql (for reference, the python script will execute these)
-
 CREATE DATABASE IF NOT EXISTS ebc_db;
 USE ebc_db;
 
