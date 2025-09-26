@@ -144,3 +144,4 @@ class SubscriptionsPage(tk.Frame):
             SubscriptionDAO.update_status(sub_id, 'Cancelled')
             self.controller.show_status_message("Subscription cancelled.")
             self.load_subscriptions()
+            
