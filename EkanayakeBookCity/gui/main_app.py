@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, font
-from .pages import (dashboard_page, publications_page, customers_page, 
-                    orders_page, advertisements_page, stock_page, billing_page, reports_page, subscriptions_page)
+from .pages import (dashboard_page, publications_page, customers_page, orders_page, manage_orders_page,
+                    advertisements_page, stock_page, billing_page, reports_page, subscriptions_page)
 
 class EBCManagementSystem(tk.Tk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.title("Ekanayake Book City Management System")
+        self.title("Ekanayake Book City PaperTrack")
         self.geometry("1280x720") 
         self.minsize(1100, 650)   
 
@@ -16,15 +16,15 @@ class EBCManagementSystem(tk.Tk):
         self.style.theme_use("clam") 
         self.configure(background='#F0F0F0')
 
-        # Main Layout Frames
+        # Main Layout
         sidebar = tk.Frame(self, bg='#2c3e50', width=200)
         sidebar.pack(side="left", fill="y")
 
         main_content_frame = tk.Frame(self)
         main_content_frame.pack(side="right", fill="both", expand=True)
 
-        # Status Bar Implementation
-        self.status_bar = tk.Label(main_content_frame, text="Welcome to EBC Management System", 
+        # Status Bar 
+        self.status_bar = tk.Label(main_content_frame, text="Welcome to EBC PaperTrack", 
                                    bd=1, relief=tk.SUNKEN, anchor=tk.W, padx=10,
                                    font=("Arial", 10))
         self.status_bar.pack(side="bottom", fill="x")
@@ -33,20 +33,21 @@ class EBCManagementSystem(tk.Tk):
         self.content_area = tk.Frame(main_content_frame, bg='#ecf0f1')
         self.content_area.pack(fill="both", expand=True)
 
-        # Dictionar to page classes
+        # page classes
         self.pages = {}
         
-        # Sidebar Content
+        # Sidebar
         logo_label = tk.Label(sidebar, text="EBC", bg='#2c3e50', fg='white', 
                               font=("Arial", 30, "bold"))
         logo_label.pack(pady=20, padx=10)
 
-        # button text to page class
+        # button text
         nav_buttons = {
             "Dashboard": dashboard_page.DashboardPage,
             "Publications": publications_page.PublicationsPage,
             "Customers": customers_page.CustomersPage,
-            "Orders": orders_page.OrdersPage,
+            "Create Order": orders_page.OrdersPage,
+            "Manage Orders": manage_orders_page.ManageOrdersPage,
             "Subscriptions": subscriptions_page.SubscriptionsPage,
             "Advertisements": advertisements_page.AdvertisementsPage,
             "Stock": stock_page.StockPage,
