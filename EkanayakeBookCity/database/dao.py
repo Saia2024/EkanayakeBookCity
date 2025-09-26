@@ -103,6 +103,12 @@ class StockDAO:
         params = (new_quantity, publication_id)
         return Database.execute_query(query, params)
 
+    @staticmethod
+    def get_stock_quantity(publication_id):
+        query = "SELECT quantity FROM stock WHERE publication_id = %s"
+        result = Database.execute_query(query, (publication_id,), fetch='one')
+        return result['quantity'] if result else 0
+
 class OrderDAO:
     
     @staticmethod
@@ -144,6 +150,31 @@ class OrderDAO:
         query = "SELECT COUNT(*) as total FROM orders WHERE delivery_status = 'Pending'"
         result = Database.execute_query(query, fetch='one')
         return result['total'] if result else 0
+
+    @staticmethod
+    def update_delivery_status(order_id, new_status):
+        query = "UPDATE orders SET delivery_status = %s WHERE order_id = %s"
+        return Database.execute_query(query, (new_status, order_id))
+
+    @staticmethod
+    def get_all_with_details():
+        query = """
+            SELECT o.order_id, c.name AS customer_name, o.order_date, o.total_amount, o.delivery_status, o.payment_status
+            FROM orders o
+            JOIN customers c ON o.customer_id = c.customer_id
+            ORDER BY o.order_id DESC;
+        """
+        return Database.execute_query(query, fetch='all')
+
+    @staticmethod
+    def get_order_items(order_id):
+        query = """
+            SELECT p.title, oi.quantity, oi.price_per_unit, (oi.quantity * oi.price_per_unit) as subtotal
+            FROM order_items oi
+            JOIN publications p ON oi.publication_id = p.publication_id
+            WHERE oi.order_id = %s;
+        """
+        return Database.execute_query(query, (order_id,), fetch='all')
 
 class SubscriptionDAO:
 
