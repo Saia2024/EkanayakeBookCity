@@ -1,4 +1,3 @@
-# gui/pages/advertisements_page.py
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
 from database.dao import CustomerDAO, PublicationDAO, AdvertisementDAO
@@ -10,16 +9,15 @@ class AdvertisementsPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         
-        # --- Variables ---
+        # Variables
         self.customer_id_var = tk.StringVar()
         self.publication_id_var = tk.StringVar()
         self.publication_date_var = tk.StringVar(value=date.today().isoformat())
 
-        # --- Widgets ---
+        # Widgets
         entry_frame = ttk.LabelFrame(self, text="Advertisement Details")
         entry_frame.pack(fill="x", padx=10, pady=10)
 
-        # Populate customer and publication dropdowns
         customers = CustomerDAO.get_all()
         customer_choices = [f"{c['customer_id']} - {c['name']}" for c in customers] if customers else []
         publications = PublicationDAO.get_all()
