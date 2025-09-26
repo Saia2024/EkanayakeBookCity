@@ -78,11 +78,9 @@ class CustomersPage(tk.Frame):
         self.load_customers()
 
     def validate_numeric(self, value_if_allowed):
-        """Validates that the input is either empty or consists only of digits."""
         return value_if_allowed.isdigit() or value_if_allowed == ""
 
     def sort_treeview_column(self, col):
-        """Sorts a treeview column when its header is clicked."""
         data = [(self.tree.set(child, col), child) for child in self.tree.get_children('')]
         
         data.sort(key=lambda item: item[0].lower(), reverse=self.tree_sort_reverse[col])
