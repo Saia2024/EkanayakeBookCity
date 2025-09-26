@@ -256,9 +256,29 @@ class BillingDAO:
         return Database.execute_query(query, fetch='all')
 
     @staticmethod
+    def get_all_with_details():
+        query = "SELECT b.bill_id, b.customer_id, c.name as customer_name, b.bill_type, b.related_id, b.due_amount, b.due_date, b.status FROM bills b JOIN customers c ON b.customer_id = c.customer_id ORDER BY b.bill_id DESC"
+        return Database.execute_query(query, fetch='all')
+
+    @staticmethod
     def update_status(bill_id, status):
-        query = "UPDATE bills SET status = %s WHERE bill_id = %s"
-        return Database.execute_query(query, (status, bill_id))
+        get_bill_query = "SELECT bill_type, related_id FROM bills WHERE bill_id = %s"
+        bill_info = Database.execute_query(get_bill_query, (bill_id,), fetch='one')
+
+        if not bill_info:
+            print(f"Error: Bill with ID {bill_id} not found.")
+            return None
+
+        update_bill_query = "UPDATE bills SET status = %s WHERE bill_id = %s"
+        result = Database.execute_query(update_bill_query, (status, bill_id))
+
+        if bill_info['bill_type'] == 'Order':
+            order_id = bill_info['related_id']
+            update_order_query = "UPDATE orders SET payment_status = %s WHERE order_id = %s"
+            Database.execute_query(update_order_query, (status, order_id))
+            print(f"Synchronized payment status for Order ID: {order_id}")
+            
+        return result
 
     @staticmethod
     def get_order_invoice_details(order_id):
