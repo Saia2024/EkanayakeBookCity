@@ -81,7 +81,10 @@ class AdvertisementsPage(tk.Frame):
         
         # Calculate cost
         word_count = len(content.split())
-        cost = word_count * AD_RATE_PER_WORD
+        if word_count <= 10:
+            cost = 500
+        else:
+            cost = 500+((word_count-10) * AD_RATE_PER_WORD)
         
         if messagebox.askyesno("Confirm Cost", f"The calculated cost is {cost:.2f} ({word_count} words). Proceed?"):
             AdvertisementDAO.add(customer_id, publication_id, self.publication_date_var.get(), content, cost)
