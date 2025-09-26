@@ -8,6 +8,9 @@ class BillingPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+
+        self.invoices_dir = "Invoices"
+        os.makedirs(self.invoices_dir, exist_ok=True)
         
         title_label = ttk.Label(self, text="Billing Records", font=("Arial", 18, "bold"))
         title_label.pack(pady=10, anchor='w', padx=10)
@@ -151,8 +154,6 @@ Order Details (Date: {main_info['order_date']})
         return text
 
     def _format_ad_invoice_text(self, bill_id, ad_id, details):
-        """Formats the data for an advertisement invoice into a string."""
-
         status_stamp = f"*** {details['payment_status'].upper()} ***".center(70)
 
         text = f"""
@@ -191,12 +192,11 @@ Content:
         return text
 
     def save_invoice_file(self, bill_id, content):
-        """Opens a save dialog and writes the invoice content to a file."""
         try:
             filepath = filedialog.asksaveasfilename(
                 defaultextension=".txt",
                 filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")],
-                initialdir=os.path.expanduser("~"), 
+                initialdir=self.invoices_dir, 
                 initialfile=f"EBC-Invoice-{bill_id}.txt"
             )
             if not filepath:
