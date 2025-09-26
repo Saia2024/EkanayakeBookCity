@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from tkcalendar import DateEntry 
 from database.dao import ReportDAO, CustomerDAO
-from datetime import date
+from datetime import datetime, date
 import csv
 import os
 
@@ -11,6 +11,9 @@ class ReportsPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+
+        self.reports_dir = "Reports"
+        os.makedirs(self.reports_dir, exist_ok=True)
 
         # Main Layout
         filter_frame = ttk.LabelFrame(self, text="Report Filters")
@@ -143,8 +146,13 @@ class ReportsPage(tk.Frame):
             messagebox.showerror("Error", "No data to export.")
             return
         
+        report_type_slug = self.report_type_var.get().replace(' ', '_')
+        timestamp = datetime.now().strftime("%Y-%m-%d")
+        suggested_filename = f"{report_type_slug}_{timestamp}.csv"
+
         filename = filedialog.asksaveasfilename(
-            initialdir=os.path.expanduser("~"),
+            initialdir=self.reports_dir, 
+            initialfile=suggested_filename, 
             title="Save Report As",
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
@@ -156,10 +164,9 @@ class ReportsPage(tk.Frame):
         try:
             with open(filename, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
-                # Write header
                 columns = self.tree["columns"]
                 writer.writerow(columns)
-                # Write data
+                
                 for child in self.tree.get_children():
                     row = self.tree.item(child)['values']
                     writer.writerow(row)
