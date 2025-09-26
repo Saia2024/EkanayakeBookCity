@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from database.dao import CustomerDAO, PublicationDAO, OrderDAO
+from database.dao import CustomerDAO, PublicationDAO, OrderDAO, StockDAO
 from datetime import date
 from PIL import Image, ImageTk
 
@@ -146,6 +146,16 @@ class OrdersPage(tk.Frame):
         if not self.current_order_items:
             messagebox.showerror("Error", "Order must contain at least one publication.")
             return
+        
+        for item in self.current_order_items:
+            available_stock = StockDAO.get_stock_quantity(item['pub_id'])
+            if item['quantity'] > available_stock:
+                messagebox.showerror("Insufficient Stock", 
+                                     f"Cannot create order.\n\n"
+                                     f"Item: {item['title']}\n"
+                                     f"Requested: {item['quantity']}\n"
+                                     f"Available: {available_stock}")
+                return
         
         cust_id = int(cust_selection.split(' - ')[0])
         
