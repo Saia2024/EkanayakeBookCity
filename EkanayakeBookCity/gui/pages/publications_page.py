@@ -93,7 +93,6 @@ class PublicationsPage(tk.Frame):
             return False
 
     def sort_treeview_column(self, col):
-        """Sorts a treeview column when its header is clicked."""
         data = [(self.tree.set(child, col), child) for child in self.tree.get_children('')]
         
         def sort_key(item):
