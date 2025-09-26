@@ -1,5 +1,4 @@
-# Ekanayake Book City - Management System
-
+# Ekanayake Book City - PaperTrack
 A comprehensive desktop application designed to manage the operations of a paper and magazine distribution business. This system is built using Python, featuring a clean user interface with Tkinter and a robust MySQL database backend, all structured with Object-Oriented Programming (OOP) principles.
 
 ## ✨ Features
